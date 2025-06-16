@@ -24,28 +24,34 @@ if option == "💵 Salary Advance":
     requested_amount = st.number_input("Requested Advance Amount", min_value=0.0, format="%.2f")
 
     if st.button("🧮 Calculate Advance"):
-            try:
-                res = requests.post("http://backend:8000/calculate_advance", json={
-                    "gross_salary": gross_salary,
-                    "pay_frequency": pay_frequency,
-                    "requested_amount": requested_amount
-                })
-                output = res.json()
+            if gross_salary <= 0 or requested_amount <= 0:
+                 st.warning(" No gross salary or requested amount inputted")
 
-                if output["eligible"]:
-                    st.success("✅ You are eligible for this advance.")
-                else:
-                    st.error("❌ You are not eligible for the requested amount.")
+            else:
+                try:
+                    res = requests.post("http://backend:8000/calculate_advance", json={
+                        "gross_salary": gross_salary,
+                        "pay_frequency": pay_frequency,
+                        "requested_amount": requested_amount
+                    })
+                    output = res.json()
 
-                st.write(f"**Employee name:{name}**")
-                st.write(f"**Requested Amount:** ${output['requested']:.2f}")
-                st.write(f"**Maximum Eligible Amount:** ${output['max_eligible_amount']:.2f}")
-                st.write(f"**Fee (5%):** ${output['fee']:.2f}")
-                st.write(f"**Total Due:** ${output['total_due']:.2f}")
+                    # st.json(output)
 
-            except Exception as e:
-                st.error("⚠️ Error processing your request.")
-                st.write(e)
+                    if output["eligible"]:
+                        st.success("✅ You are eligible for this advance.")
+                    else:
+                        st.error("❌ You are not eligible for the requested amount.")
+
+                    st.write(f"**Employee name:{name}**")
+                    st.write(f"**Requested Amount:** ${output['requested']:.2f}")
+                    st.write(f"**Maximum Eligible Amount:** ${output['max_eligible_amount']:.2f}")
+                    st.write(f"**Fee (5%):** ${output['fee']:.2f}")
+                    st.write(f"**Total Due:** ${output['total_due']:.2f}")
+
+                except Exception as e:
+                    st.error("⚠️ Error processing your request.")
+                    st.write(e)
 
 # === Loan Calculator Section ===
 elif option == "📊 Loan Calculator":
@@ -56,18 +62,22 @@ elif option == "📊 Loan Calculator":
     years = st.number_input("Loan Term (Years)", min_value=1)
 
     if st.button("🧮 Calculate Loan"):
-        try:
-            res = requests.post("http://backend:8000/calculate_loan", json={
-                "principal": principal,
-                "annual_rate": rate,
-                "years": years
-            })
-            output = res.json()
+        if principal <= 0 or years <=0:
+            st.warning(" No Loan Amount or Loan Term inputted")
 
-            st.success(f"Loan Calculation for {name if name else 'User'}")
-            st.write(f"💰 **Monthly Payment:** ${output['monthly_payment']}")
-            st.write(f"📈 **Total Payment:** ${output['total_payment']}")
-            
-        except Exception as e:
-            st.error("Error processing your request.")
-            st.write(e)
+        else:
+            try:
+                res = requests.post("http://backend:8000/calculate_loan", json={
+                    "principal": principal,
+                    "annual_rate": rate,
+                    "years": years
+                })
+                output = res.json()
+
+                st.success(f"Loan Calculation for {name if name else 'User'}")
+                st.write(f"💰 **Monthly Payment:** ${output['monthly_payment']}")
+                st.write(f"📈 **Total Payment:** ${output['total_payment']}")
+                
+            except Exception as e:
+                st.error("Error processing your request.")
+                st.write(e)
